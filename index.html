@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لعبة الخلية ثلاثية الأبعاد</title>
+  <style>
+    /* 1) إعدادات أساسية للصفحة */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+      background-color: #f5f5dc;
+      direction: rtl;
+      margin: 0;
+      overflow: hidden;
+      position: relative;
+      font-family: Arial, sans-serif;
+    }
+
+    /* 2) طبقات الخلفية الحمراء والخضراء */
+    .background-layer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    .top-green,
+    .bottom-green {
+      position: absolute;
+      width: 20000%;
+      height: 30%;
+      background-color: green;
+      z-index: -2;
+    }
+    .top-green {
+      top: 0;
+      clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
+    }
+    .bottom-green {
+      bottom: 0;
+      clip-path: polygon(0% 0%, 50% 100%, 100% 0%);
+    }
+    .left-red,
+    .right-red {
+      position: absolute;
+      width: 52%;
+      height: 100%;
+      background-color: red;
+      z-index: -2;
+    }
+    .left-red {
+      left: 0;
+      clip-path: polygon(0% 0%, 110% 50%, 0% 105%);
+    }
+    .right-red {
+      right: 0;
+      clip-path: polygon(100% 0%, 30% 58%, 100% 95%);
+    }
+
+    /* 3) حاوية الخلايا السداسية */
+    .hex-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    .hex-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: -28px;
+      transform: none;
+    }
+    /* الصفوف 1 و3 و5 تتحرك لليمين قليلاً */
+    .hex-row:nth-child(1),
+    .hex-row:nth-child(3),
+    .hex-row:nth-child(5) {
+      transform: translateX(51px);
+    }
+
+    /* 4) الخلية السداسية */
+    .hex {
+      position: relative;
+      width: 100px;
+      height: 110px;
+      background: linear-gradient(to bottom, #ffffff, #dddddd);
+      clip-path: polygon(
+        50% 0%,
+        100% 25%,
+        100% 75%,
+        50% 100%,
+        0% 75%,
+        0% 25%
+      );
+      margin: 0;
+      font-size: 35px;
+      font-weight: bold;
+      color: blue;
+      cursor: pointer;
+      z-index: 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+      transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+      text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .hex::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: transparent;
+      border: 2px solid black;
+      clip-path: inherit;
+      z-index: 10;
+      transform: scale(1.03);
+      transform-origin: center;
+    }
+
+    .hex.red {
+      background: linear-gradient(to bottom, #ff9999, #cc0000);
+    }
+    .hex.green {
+      background: linear-gradient(to bottom, #99ff99, #00cc00);
+    }
+    .hex.white {
+      background: linear-gradient(to bottom, #ffffff, #dddddd);
+    }
+  </style>
+</head>
+<body>
+  <div class="background-layer top-green"></div>
+  <div class="background-layer bottom-green"></div>
+  <div class="background-layer left-red"></div>
+  <div class="background-layer right-red"></div>
+
+  <div class="hex-container" id="hex-container"></div>
+
+  <script>
+    const arabicLetters = "أبتثجحخدذرزسشصضطظعغفقكلمنهوي".split("");
+    const container = document.getElementById("hex-container");
+    let usedLetters = new Set();
+
+    function getUniqueRandomLetter() {
+      if (usedLetters.size >= arabicLetters.length) {
+        usedLetters.clear();
+      }
+      let letter;
+      do {
+        letter = arabicLetters[Math.floor(Math.random() * arabicLetters.length)];
+      } while (usedLetters.has(letter));
+      usedLetters.add(letter);
+      return letter;
+    }
+
+    function cycleColor(hex) {
+      if (hex.classList.contains("white")) {
+        hex.classList.remove("white");
+        hex.classList.add("red");
+      } else if (hex.classList.contains("red")) {
+        hex.classList.remove("red");
+        hex.classList.add("green");
+      } else if (hex.classList.contains("green")) {
+        hex.classList.remove("green");
+        hex.classList.add("white");
+      } else {
+        hex.classList.add("red");
+      }
+    }
+
+    function generateHexCells() {
+      container.innerHTML = "";
+      usedLetters.clear();
+      for (let row = 0; row < 5; row++) {
+        const hexRow = document.createElement("div");
+        hexRow.classList.add("hex-row");
+        for (let col = 0; col < 5; col++) {
+          const hex = document.createElement("div");
+          hex.classList.add("hex", "white");
+          hex.textContent = getUniqueRandomLetter();
+          hex.addEventListener("click", () => {
+            cycleColor(hex);
+          });
+          hexRow.appendChild(hex);
+        }
+        container.appendChild(hexRow);
+      }
+    }
+
+    generateHexCells();
+  </script>
+</body>
+</html>
+
+
